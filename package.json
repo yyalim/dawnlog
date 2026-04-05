@@ -5,9 +5,9 @@
   "author": "Yusuf Yalim",
   "license": "MIT",
   "keywords": ["standup", "cli", "git", "llm", "developer-tools", "productivity"],
-  "homepage": "https://github.com/yusufyalim/dawnlog#readme",
+  "homepage": "https://github.com/yyalim/dawnlog#readme",
   "bugs": {
-    "url": "https://github.com/yusufyalim/dawnlog/issues"
+    "url": "https://github.com/yyalim/dawnlog/issues"
   },
   "type": "module",
   "bin": {
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yusufyalim/dawnlog.git"
+    "url": "https://github.com/yyalim/dawnlog.git"
   },
   "main": "./dist/main.js",
   "files": [

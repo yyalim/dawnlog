@@ -1,0 +1,38 @@
+{
+  "name": "dawnlog",
+  "version": "0.1.0",
+  "description": "CLI tool that generates daily developer standup reports",
+  "type": "module",
+  "bin": {
+    "dawnlog": "./dist/main.js"
+  },
+  "main": "./dist/main.js",
+  "files": [
+    "dist",
+    "templates",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "build": "tsc && node -e \"require('fs').chmodSync('dist/main.js', 0o755)\"",
+    "lint": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "chalk": "^5.4.1",
+    "commander": "^13.1.0",
+    "openai": "^4.85.4",
+    "ora": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.2",
+    "typescript": "^6.0.2",
+    "vitest": "^3.1.1"
+  }
+}

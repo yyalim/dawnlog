@@ -1,10 +1,17 @@
 {
   "name": "dawnlog",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "CLI tool that generates daily developer standup reports",
   "author": "Yusuf Yalim",
   "license": "MIT",
-  "keywords": ["standup", "cli", "git", "llm", "developer-tools", "productivity"],
+  "keywords": [
+    "standup",
+    "cli",
+    "git",
+    "llm",
+    "developer-tools",
+    "productivity"
+  ],
   "homepage": "https://github.com/yyalim/dawnlog#readme",
   "bugs": {
     "url": "https://github.com/yyalim/dawnlog/issues"

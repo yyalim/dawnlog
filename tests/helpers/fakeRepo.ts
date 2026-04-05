@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, execFileSync } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -32,7 +32,7 @@ export function createFakeRepo(commits: FakeCommit[]): string {
       GIT_COMMITTER_EMAIL: commit.email ?? "test@test.com",
     };
 
-    execSync(`git commit -m "${commit.message}"`, { cwd: dir, env });
+    execFileSync("git", ["commit", "-m", commit.message], { cwd: dir, env });
   }
 
   return dir;

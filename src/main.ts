@@ -2,7 +2,7 @@
 import { Command } from "commander";
 import chalk from "chalk";
 import ora from "ora";
-import { loadConfig, saveConfig, configExists } from "./config.js";
+import { loadConfig, saveConfig, configExists, type Config } from "./config.js";
 import { createProvider } from "./llm/index.js";
 import { runPipeline } from "./pipeline.js";
 import { runSetupWizard } from "./setup.js";
@@ -88,12 +88,14 @@ program.action(async (options: { today?: string; provider?: string; dryRun?: boo
 });
 
 // Apply a dot-notation key=value to the config object in-place
-function applyConfigSet(config: ReturnType<typeof Object.create>, key: string, value: string): void {
+function applyConfigSet(config: Config, key: string, value: string): void {
   const validKeys: Record<string, (v: string) => void> = {
     "llm.provider": (v) => {
-      const valid = ["anthropic", "openai", "ollama"];
-      if (!valid.includes(v)) throw new Error(`Invalid provider "${v}". Valid: ${valid.join(", ")}`);
-      config.llm.provider = v;
+      const valid = ["anthropic", "openai", "ollama"] as const;
+      if (!valid.includes(v as typeof valid[number])) {
+        throw new Error(`Invalid provider "${v}". Valid: ${valid.join(", ")}`);
+      }
+      config.llm.provider = v as typeof valid[number];
     },
     "llm.model":      (v) => { config.llm.model = v; },
     "llm.apiKey":     (v) => { config.llm.apiKey = v; },

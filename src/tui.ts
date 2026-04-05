@@ -37,11 +37,16 @@ export function askMultiline(prompt: string): Promise<string> {
       lines.push(line);
     });
 
+    let cancelled = false;
+
     rl.on("close", () => {
-      resolve(lines.join("\n").trim());
+      if (!cancelled) {
+        resolve(lines.join("\n").trim());
+      }
     });
 
     rl.on("SIGINT", () => {
+      cancelled = true;
       rl.close();
       process.stdout.write("\n");
       reject(new Error("Cancelled"));

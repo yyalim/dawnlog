@@ -64,11 +64,12 @@ export async function getCommitsForRepo(
   until: Date,
   author?: string,
 ): Promise<Commit[]> {
+  // Use ASCII Unit Separator (0x1F) as delimiter — cannot appear in commit messages
   const args = [
     "log",
     "--branches",
     "--no-merges",
-    "--format=%H|%h|%s|%an|%ae|%aI",
+    "--format=%H%x1F%h%x1F%s%x1F%an%x1F%ae%x1F%aI",
     `--after=${since.toISOString()}`,
     `--before=${until.toISOString()}`,
   ];
@@ -93,7 +94,7 @@ export async function getCommitsForRepo(
   const repoName = path.basename(repoPath);
 
   return lines.map((line) => {
-    const parts = line.split("|");
+    const parts = line.split("\x1F");
     const hash = parts[0] ?? "";
     const shortHash = parts[1] ?? "";
     const subject = parts[2] ?? "";

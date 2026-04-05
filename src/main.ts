@@ -56,7 +56,7 @@ async function runCommand(options: {
 
   const llm = createProvider(config);
 
-  const spinner = ora("Generating standup report...").start();
+  const spinner = options.dryRun ? null : ora("Generating standup report...").start();
   try {
     const result = await runPipeline({
       repos: config.repos,
@@ -71,13 +71,13 @@ async function runCommand(options: {
       since: options.since,
     });
 
-    spinner.stop();
+    spinner?.stop();
 
     if (!options.dryRun && result.outputPath) {
       console.log(chalk.green(`\n✓ Standup saved to: ${result.outputPath}\n`));
     }
   } catch (err) {
-    spinner.stop();
+    spinner?.stop();
     throw err;
   }
 }

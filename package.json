@@ -2,9 +2,20 @@
   "name": "dawnlog",
   "version": "0.1.0",
   "description": "CLI tool that generates daily developer standup reports",
+  "author": "Yusuf Yalim",
+  "license": "MIT",
+  "keywords": ["standup", "cli", "git", "llm", "developer-tools", "productivity"],
+  "homepage": "https://github.com/yusufyalim/dawnlog#readme",
+  "bugs": {
+    "url": "https://github.com/yusufyalim/dawnlog/issues"
+  },
   "type": "module",
   "bin": {
     "dawnlog": "./dist/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yusufyalim/dawnlog.git"
   },
   "main": "./dist/main.js",
   "files": [
@@ -20,7 +31,8 @@
     "build": "tsc && node -e \"require('fs').chmodSync('dist/main.js', 0o755)\"",
     "lint": "tsc --noEmit && tsc -p tsconfig.test.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { LLMProvider, LLMRequest } from "./types.js";
 
-const DEFAULT_MODEL = "claude-opus-4-5";
+const DEFAULT_MODEL = "claude-haiku-4-5";
 
 export class AnthropicProvider implements LLMProvider {
   name = "anthropic";

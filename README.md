@@ -122,6 +122,7 @@ API keys can be set via environment variables instead of storing them in the con
 
 ### Anthropic (default)
 Uses Claude models. Set `ANTHROPIC_API_KEY` or add it via the setup wizard.
+Default model: `claude-haiku-4-5`.
 
 ```bash
 dawnlog config --set llm.provider=anthropic
@@ -144,13 +145,13 @@ Runs models locally — no API key or internet connection needed.
 ```bash
 # Install Ollama from https://ollama.com, then:
 ollama serve
-ollama pull llama3.2   # or mistral, qwen2.5, gemma3, etc.
+ollama pull gemma3:12b   # default — or mistral, llama3.1:8b, qwen2.5:7b, etc.
 
 dawnlog config --set llm.provider=ollama
-dawnlog config --set llm.model=llama3.2
+dawnlog config --set llm.model=gemma3:12b
 ```
 
-Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
+Default model: `gemma3:12b`. Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
 
 ### Adding a Custom Provider
 1. Create `src/llm/myprovider.ts` implementing the `LLMProvider` interface

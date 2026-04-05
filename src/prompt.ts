@@ -7,8 +7,8 @@ export function linkifyTickets(text: string, baseUrl: string): string {
   return text.replace(TICKET_PATTERN, (_, id: string) => `[${id}](${base}/${id})`);
 }
 
-export function buildSystemPrompt(systemPromptTemplate: string, templateContent: string): string {
-  return systemPromptTemplate.replace("{{TEMPLATE}}", templateContent);
+export function buildSystemPrompt(systemPromptTemplate: string): string {
+  return systemPromptTemplate;
 }
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];

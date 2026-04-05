@@ -34,7 +34,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<PipelineResult
   ]);
 
   const now = new Date();
-  const systemPrompt = buildSystemPrompt(systemPromptTemplate, templateContent);
+  const systemPrompt = buildSystemPrompt(systemPromptTemplate);
   const userPrompt = buildUserPrompt(commits, opts.todayPlan, since, now, templateContent, opts.ticketBaseUrl);
 
   if (opts.dryRun) {

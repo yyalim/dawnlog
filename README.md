@@ -194,7 +194,7 @@ cp /path/to/dawnlog/templates/system-prompt.md ~/my-system-prompt.md
 dawnlog config --set systemPromptPath=~/my-system-prompt.md
 ```
 
-The system prompt uses `{{TEMPLATE}}` as the slot where the output template is inserted at runtime.
+The output template is passed to the LLM via the user message at runtime, so the system prompt is focused purely on instructions and examples.
 
 ## Output
 

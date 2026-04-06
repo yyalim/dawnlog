@@ -199,14 +199,14 @@ describe("E2E — runPipeline", () => {
   });
 
   // -------------------------------------------------------------------------
-  // 6. Weekend commits excluded — Saturday/Sunday commits do not appear
-  //    in a Monday run (which queries the previous Friday)
+  // 6. Weekend work included — Saturday/Sunday commits DO appear in a Monday run
   // -------------------------------------------------------------------------
-  test("Weekend commits excluded — Saturday/Sunday commits do not appear in a Monday run", async () => {
+  test("Weekend work included — Saturday/Sunday commits appear in a Monday run", async () => {
     vi.setSystemTime(new Date("2025-01-27T09:00:00")); // Monday
 
-    // Commits on the weekend (Sat Jan 25, Sun Jan 26) — outside the Friday window
+    // since=Fri Jan 24 00:00, until=Sun Jan 26 23:59 — weekend commits are in range
     const repo = createFakeRepo([
+      { message: "feat: friday work",   date: "2025-01-24T16:00:00" }, // Friday
       { message: "feat: saturday hack", date: "2025-01-25T14:00:00" }, // Saturday
       { message: "fix: sunday fix",     date: "2025-01-26T10:00:00" }, // Sunday
     ]);
@@ -218,12 +218,10 @@ describe("E2E — runPipeline", () => {
       expect(llm.calls).toHaveLength(1);
       const prompt = llm.calls[0]?.userPrompt ?? "";
 
-      // Weekend commits must NOT appear
-      expect(prompt).not.toContain("feat: saturday hack");
-      expect(prompt).not.toContain("fix: sunday fix");
-
-      // No-commits message should be present instead
-      expect(prompt).toContain("No commits");
+      // All three days must appear
+      expect(prompt).toContain("feat: friday work");
+      expect(prompt).toContain("feat: saturday hack");
+      expect(prompt).toContain("fix: sunday fix");
     } finally {
       destroyFakeRepo(repo);
     }

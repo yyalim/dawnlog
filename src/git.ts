@@ -34,25 +34,26 @@ export function parseDateRange(dateStr: string): WorkingDayRange {
 export function getLastWorkingDay(now: Date = new Date()): WorkingDayRange {
   const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
 
-  // Calculate days to go back
-  let daysBack: number;
+  // How far back does the last working day start?
+  let daysBackForSince: number;
   if (day === 1) {
-    daysBack = 3; // Monday → Friday
+    daysBackForSince = 3; // Monday → since Friday
   } else if (day === 0) {
-    daysBack = 2; // Sunday → Friday
+    daysBackForSince = 2; // Sunday → since Friday
   } else if (day === 6) {
-    daysBack = 1; // Saturday → Friday
+    daysBackForSince = 1; // Saturday → since Friday
   } else {
-    daysBack = 1; // Tue-Fri → previous day
+    daysBackForSince = 1; // Tue–Fri → since yesterday
   }
 
-  const target = new Date(now);
-  target.setDate(target.getDate() - daysBack);
-
-  const since = new Date(target);
+  const since = new Date(now);
+  since.setDate(since.getDate() - daysBackForSince);
   since.setHours(0, 0, 0, 0);
 
-  const until = new Date(target);
+  // until is always end-of-day yesterday so commits made after the last
+  // working day are not missed (e.g. Monday: since=Fri 00:00, until=Sun 23:59).
+  const until = new Date(now);
+  until.setDate(until.getDate() - 1);
   until.setHours(23, 59, 59, 999);
 
   return { since, until };

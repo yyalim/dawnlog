@@ -50,8 +50,8 @@ export function getLastWorkingDay(now: Date = new Date()): WorkingDayRange {
   since.setDate(since.getDate() - daysBackForSince);
   since.setHours(0, 0, 0, 0);
 
-  // until is always end-of-day yesterday — captures any weekend work.
-  // e.g. Monday: since=Fri 00:00, until=Sun 23:59 → Friday + Sat + Sun all included.
+  // until is always end-of-day yesterday so commits made after the last
+  // working day are not missed (e.g. Monday: since=Fri 00:00, until=Sun 23:59).
   const until = new Date(now);
   until.setDate(until.getDate() - 1);
   until.setHours(23, 59, 59, 999);

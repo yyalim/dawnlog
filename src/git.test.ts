@@ -25,14 +25,15 @@ describe("getLastWorkingDay", () => {
   });
 
   const cases = [
-    { label: "Tuesday → Monday",    date: "2025-01-28T09:00:00", expectedSince: "2025-01-27", expectedDay: 1 },
-    { label: "Monday → Friday",     date: "2025-01-27T09:00:00", expectedSince: "2025-01-24", expectedDay: 5 },
-    { label: "Wednesday → Tuesday", date: "2025-01-29T09:00:00", expectedSince: "2025-01-28", expectedDay: 2 },
-    { label: "Saturday → Friday",   date: "2025-02-01T09:00:00", expectedSince: "2025-01-31", expectedDay: 5 },
-    { label: "Sunday → Friday",     date: "2025-02-02T09:00:00", expectedSince: "2025-01-31", expectedDay: 5 },
+    // expectedUntil = yesterday (captures weekend work when today is Mon/Sun)
+    { label: "Tuesday → Monday",    date: "2025-01-28T09:00:00", expectedSince: "2025-01-27", expectedUntil: "2025-01-27", expectedDay: 1 },
+    { label: "Monday → Friday",     date: "2025-01-27T09:00:00", expectedSince: "2025-01-24", expectedUntil: "2025-01-26", expectedDay: 5 },
+    { label: "Wednesday → Tuesday", date: "2025-01-29T09:00:00", expectedSince: "2025-01-28", expectedUntil: "2025-01-28", expectedDay: 2 },
+    { label: "Saturday → Friday",   date: "2025-02-01T09:00:00", expectedSince: "2025-01-31", expectedUntil: "2025-01-31", expectedDay: 5 },
+    { label: "Sunday → Friday",     date: "2025-02-02T09:00:00", expectedSince: "2025-01-31", expectedUntil: "2025-02-01", expectedDay: 5 },
   ];
 
-  for (const { label, date, expectedSince, expectedDay } of cases) {
+  for (const { label, date, expectedSince, expectedUntil, expectedDay } of cases) {
     test(label, () => {
       vi.setSystemTime(new Date(date));
       const { since, until } = getLastWorkingDay();
@@ -45,8 +46,8 @@ describe("getLastWorkingDay", () => {
       expect(since.getMinutes()).toBe(0);
       expect(since.getSeconds()).toBe(0);
 
-      // until is end of same day (local time)
-      expect(localDateStr(until)).toBe(expectedSince);
+      // until is end-of-day yesterday — may span into the weekend
+      expect(localDateStr(until)).toBe(expectedUntil);
       expect(until.getHours()).toBe(23);
       expect(until.getMinutes()).toBe(59);
       expect(until.getSeconds()).toBe(59);

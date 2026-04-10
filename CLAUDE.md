@@ -15,7 +15,7 @@ The goal is to eventually ship this as a product, so code quality, extensibility
 ## Stack
 
 - **Runtime:** Node.js 20+ with ESM (`"type": "module"`)
-- **Language:** TypeScript 5 (strict mode)
+- **Language:** TypeScript 6 (strict mode)
 - **CLI framework:** `commander`
 - **Terminal UI:** raw `readline` (no heavy TUI lib) with `chalk` + `ora`
 - **LLM SDKs:** `@anthropic-ai/sdk`, `openai`

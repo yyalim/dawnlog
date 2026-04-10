@@ -5,15 +5,20 @@ A CLI tool that generates daily developer standup reports by reading your git co
 ## Installation
 
 ```bash
-# For local development
-git clone <repo>
-cd dawnlog
-npm install
-npm run build
-npm link   # makes `dawnlog` available globally
+npm install -g dawnlog
 ```
 
 Requires **Node.js 20+**.
+
+### From source
+
+```bash
+git clone https://github.com/yyalim/dawnlog.git
+cd dawnlog
+npm install
+npm run build
+npm link
+```
 
 ## Quick Start
 
@@ -251,9 +256,6 @@ npm run test:watch  # Watch mode
 - [ ] `dawnlog post` — post output to Slack via webhook
 - [ ] `dawnlog week` — weekly summary across all logs in outputDir
 - [ ] `npx dawnlog` support (publish to npm)
-- [ ] `excludePatterns` config — filter out noise commits (e.g. "chore: bump version")
-- [ ] Named repo aliases — display "api-service" instead of full path
-- [ ] Shell completion (bash/zsh)
 
 ## License
 

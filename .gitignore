@@ -3,6 +3,5 @@ dist/
 *.js.map
 *.d.ts.map
 .env
-.claude/
-CLAUDE.md
+.claude/settings.local.json
 .DS_Store

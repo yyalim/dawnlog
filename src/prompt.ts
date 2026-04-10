@@ -29,6 +29,7 @@ export function buildUserPrompt(
   today: Date,
   templateContent: string,
   ticketBaseUrl?: string,
+  yesterdayNotes?: string,
 ): string {
   // --- commit data ---
   let commitBlock: string;
@@ -57,7 +58,7 @@ export function buildUserPrompt(
 RULES:
 - Replace {{YESTERDAY_DATE}} with: ${formatDate(since)}
 - Replace {{TODAY_DATE}} with: ${formatDate(today)}
-- Replace {{YESTERDAY_SUMMARY}} with a structured summary of ALL the commits below. For each repo write its name as a [repo-name] header (plain text, not a markdown heading), then one line per ticket as "TICKET-ID — short description", then bullet points grouped by area (Backend:, Frontend:, Ops:, etc.). Do NOT copy commit messages verbatim. Do NOT include commit hashes.
+- Replace {{YESTERDAY_SUMMARY}} with a structured summary of ALL the commits below, plus any additional notes provided. For each repo write its name as a [repo-name] header (plain text, not a markdown heading), then one line per ticket as "TICKET-ID — short description", then bullet points grouped by area (Backend:, Frontend:, Ops: for infra/DevOps, General: for meetings/reviews/non-code). Do NOT copy commit messages verbatim. Do NOT include commit hashes. If additional yesterday notes are provided (meetings, planning, architecture, etc.), include them as a separate section after the commit summaries.
 - Replace {{TODAY_PLAN}} with a short description of today's focus based on the plan below.
 - Replace {{BLOCKERS}} with any blockers mentioned, or "None".
 - Replace {{WORKLOAD}} with: "Half day" if the plan mentions finishing early or after lunch, otherwise "Full".
@@ -65,7 +66,7 @@ RULES:
 COMMITS (last working day):
 ${commitBlock}
 
-PLAN FOR TODAY:
+${yesterdayNotes ? `ADDITIONAL YESTERDAY NOTES (e.g. meetings, reviews, discussions):\n${yesterdayNotes}\n\n` : ""}PLAN FOR TODAY:
 ${todayPlan}
 
 TEMPLATE:

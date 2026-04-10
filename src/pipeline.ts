@@ -24,6 +24,7 @@ export interface PipelineOptions {
   templatePath: string;
   systemPromptPath: string;
   todayPlan: string;
+  yesterdayNotes?: string;
   ticketBaseUrl?: string;
   dryRun?: boolean;
 }
@@ -43,7 +44,7 @@ export async function runPipeline(opts: PipelineOptions): Promise<PipelineResult
 
   const now = new Date();
   const systemPrompt = buildSystemPrompt(systemPromptTemplate);
-  const userPrompt = buildUserPrompt(opts.commits, opts.todayPlan, opts.since, now, templateContent, opts.ticketBaseUrl);
+  const userPrompt = buildUserPrompt(opts.commits, opts.todayPlan, opts.since, now, templateContent, opts.ticketBaseUrl, opts.yesterdayNotes);
 
   if (opts.dryRun) {
     return { outputPath: "", content: "", systemPrompt, userPrompt };

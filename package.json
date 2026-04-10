@@ -1,6 +1,6 @@
 {
   "name": "dawnlog",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CLI tool that generates daily developer standup reports",
   "author": "Yusuf Yalim",
   "license": "MIT",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import React from "react";
-import { render, Text, Box } from "ink";
+import type React from "react";
+import { render, renderToString, Text, Box } from "ink";
 import { Command } from "commander";
 import { loadConfig, saveConfig, configExists, type Config } from "./config.js";
 import { createProvider } from "./llm/index.js";
@@ -10,8 +10,8 @@ import { askMultiline, askSelect } from "./tui.js";
 import { StatusMessage, Spinner, CommitList, DryRunOutput, ConfigDisplay, ConfigUsage } from "./components.js";
 
 function renderOnce(node: React.ReactNode): void {
-  const instance = render(node);
-  instance.unmount();
+  const output = renderToString(node);
+  process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
 }
 
 const program = new Command();

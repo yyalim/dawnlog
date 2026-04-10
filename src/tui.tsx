@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { render, Box, Text, useInput, useApp } from "ink";
 
 export interface SelectChoice<T extends string> {
@@ -50,10 +50,14 @@ function TextArea({ value, onChange }: TextAreaProps) {
         const nextLineLen = nextNextNewline >= 0 ? nextNextNewline - nextLineStart : value.length - nextLineStart;
         setCursor(nextLineStart + Math.min(col, nextLineLen));
       }
-    } else if (key.backspace || key.delete) {
+    } else if (key.backspace) {
       if (cursor > 0) {
         onChange(`${value.slice(0, cursor - 1)}${value.slice(cursor)}`);
         setCursor(cursor - 1);
+      }
+    } else if (key.delete) {
+      if (cursor < value.length) {
+        onChange(`${value.slice(0, cursor)}${value.slice(cursor + 1)}`);
       }
     } else if (input && !key.ctrl && !key.meta) {
       const newValue = insertAt(value, input, cursor);

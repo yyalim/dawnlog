@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { Text, Box } from "ink";
 import type { Commit } from "./git.js";
 
@@ -6,7 +6,7 @@ import type { Commit } from "./git.js";
 
 interface StatusMessageProps {
   type: "success" | "warning" | "error" | "info";
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const statusConfig = {
@@ -30,9 +30,9 @@ export function StatusMessage({ type, children }: StatusMessageProps) {
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
 export function Spinner({ label }: { label: string }) {
-  const [frame, setFrame] = React.useState(0);
+  const [frame, setFrame] = useState(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setFrame((prev) => (prev + 1) % SPINNER_FRAMES.length);
     }, 80);
@@ -52,7 +52,7 @@ export function CommitList({ commits }: { commits: Commit[] }) {
   if (commits.length === 0) {
     return (
       <Box marginY={1}>
-        <Text dimColor>  No commits found for the last working day.</Text>
+        <Text dimColor>  No commits found for the selected time range.</Text>
       </Box>
     );
   }

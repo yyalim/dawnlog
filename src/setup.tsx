@@ -1,13 +1,13 @@
-import React from "react";
-import { render, Box, Text } from "ink";
+import type React from "react";
+import { renderToString, Box, Text } from "ink";
 import { saveConfig, DEFAULT_OUTPUT_DIR, DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "./config.js";
 import type { Config } from "./config.js";
 import { askSingleLine, askSelect } from "./tui.js";
 import { StatusMessage } from "./components.js";
 
 function renderOnce(node: React.ReactNode): void {
-  const instance = render(node);
-  instance.unmount();
+  const output = renderToString(node);
+  process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
 }
 
 export async function runSetupWizard(): Promise<Config> {

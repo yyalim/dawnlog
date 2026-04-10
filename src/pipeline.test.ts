@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { runPipeline } from "./pipeline.js";
+import { fetchCommits, runPipeline } from "./pipeline.js";
 import { MockLLMProvider } from "../tests/helpers/mockProvider.js";
 import { createFakeRepo, destroyFakeRepo } from "../tests/helpers/fakeRepo.js";
 import { DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "./config.js";
@@ -30,8 +30,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchCommits({ repos: [repo] });
       await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -53,8 +55,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchCommits({ repos: [repo] });
       await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -77,8 +81,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchCommits({ repos: [repo] });
       const result = await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -101,8 +107,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchCommits({ repos: [repo] });
       const result = await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -119,18 +127,17 @@ describe("runPipeline — dry-run", () => {
     }
   });
 
-  test("dryRun: true — system prompt and user prompt are printed to console", async () => {
+  test("dryRun: true — returns system prompt and user prompt in result", async () => {
     const repo = createFakeRepo([
       { message: "feat: some work", date: "2025-01-27T10:00:00" },
     ]);
 
-    // vitest intercepts console.log before process.stdout.write — spy at that level
-    const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
-
     try {
       const llm = new MockLLMProvider();
-      await runPipeline({
-        repos: [repo],
+      const { commits, since } = await fetchCommits({ repos: [repo] });
+      const result = await runPipeline({
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -139,12 +146,11 @@ describe("runPipeline — dry-run", () => {
         dryRun: true,
       });
 
-      const allOutput = logSpy.mock.calls.flat().map(String).join("\n");
-      expect(allOutput).toContain("SYSTEM PROMPT");
-      expect(allOutput).toContain("USER PROMPT");
-      expect(allOutput).toContain("dry run");
+      expect(result.systemPrompt).toBeDefined();
+      expect(result.userPrompt).toBeDefined();
+      expect(result.systemPrompt!.length).toBeGreaterThan(0);
+      expect(result.userPrompt!.length).toBeGreaterThan(0);
     } finally {
-      logSpy.mockRestore();
       destroyFakeRepo(repo);
     }
   });

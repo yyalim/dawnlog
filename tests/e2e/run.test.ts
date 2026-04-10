@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { runPipeline } from "../../src/pipeline.js";
+import { fetchCommits, runPipeline } from "../../src/pipeline.js";
 import { MockLLMProvider } from "../helpers/mockProvider.js";
 import { createFakeRepo, destroyFakeRepo } from "../helpers/fakeRepo.js";
 import { DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "../../src/config.js";
@@ -11,20 +11,23 @@ import { DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "../../src/con
 // Helpers
 // ---------------------------------------------------------------------------
 
-function makePipelineOpts(
+async function makePipelineOpts(
   repos: string[],
   llm: MockLLMProvider,
   outputDir: string,
-  overrides: Partial<Parameters<typeof runPipeline>[0]> = {},
+  overrides: Partial<Parameters<typeof runPipeline>[0] & { author?: string; sinceDate?: string }> = {},
 ) {
+  const { author, sinceDate, ...rest } = overrides;
+  const { commits, since } = await fetchCommits({ repos, author, since: sinceDate });
   return {
-    repos,
+    commits,
+    since,
     llm,
     outputDir,
     templatePath: DEFAULT_TEMPLATE_PATH,
     systemPromptPath: DEFAULT_SYSTEM_PROMPT_PATH,
     todayPlan: "Review PRs and write tests",
-    ...overrides,
+    ...rest,
   };
 }
 
@@ -58,7 +61,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      const result = await runPipeline(makePipelineOpts([repo], llm, outputDir));
+      const result = await runPipeline(await makePipelineOpts([repo], llm, outputDir));
 
       // File saved with today's date (Tuesday)
       expect(result.outputPath).toMatch(/dawnlog-2025-01-28\.md$/);
@@ -91,7 +94,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      const result = await runPipeline(makePipelineOpts([repo1, repo2], llm, outputDir));
+      const result = await runPipeline(await makePipelineOpts([repo1, repo2], llm, outputDir));
 
       // File saved with today's date (Monday)
       expect(result.outputPath).toMatch(/dawnlog-2025-01-27\.md$/);
@@ -120,7 +123,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      const result = await runPipeline(makePipelineOpts([repo], llm, outputDir));
+      const result = await runPipeline(await makePipelineOpts([repo], llm, outputDir));
 
       // File still saved
       expect(result.outputPath).toMatch(/dawnlog-2025-01-28\.md$/);
@@ -154,7 +157,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      await runPipeline(makePipelineOpts([repo1, repo2, repo3], llm, outputDir));
+      await runPipeline(await makePipelineOpts([repo1, repo2, repo3], llm, outputDir));
 
       expect(llm.calls).toHaveLength(1);
       const prompt = llm.calls[0]?.userPrompt ?? "";
@@ -182,7 +185,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      await runPipeline(makePipelineOpts([repo], llm, outputDir, { author: "alice@example.com" }));
+      await runPipeline(await makePipelineOpts([repo], llm, outputDir, { author: "alice@example.com" }));
 
       expect(llm.calls).toHaveLength(1);
       const prompt = llm.calls[0]?.userPrompt ?? "";
@@ -213,7 +216,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      await runPipeline(makePipelineOpts([repo], llm, outputDir));
+      await runPipeline(await makePipelineOpts([repo], llm, outputDir));
 
       expect(llm.calls).toHaveLength(1);
       const prompt = llm.calls[0]?.userPrompt ?? "";
@@ -240,7 +243,7 @@ describe("E2E — runPipeline", () => {
 
     try {
       const llm = new MockLLMProvider();
-      await runPipeline(makePipelineOpts([repo], llm, outputDir, { since: "2025-01-22" }));
+      await runPipeline(await makePipelineOpts([repo], llm, outputDir, { sinceDate: "2025-01-22" }));
 
       expect(llm.calls).toHaveLength(1);
       const prompt = llm.calls[0]?.userPrompt ?? "";

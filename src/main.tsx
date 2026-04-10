@@ -1,12 +1,18 @@
 #!/usr/bin/env node
+import type React from "react";
+import { render, renderToString, Text, Box } from "ink";
 import { Command } from "commander";
-import chalk from "chalk";
-import ora from "ora";
 import { loadConfig, saveConfig, configExists, type Config } from "./config.js";
 import { createProvider } from "./llm/index.js";
-import { runPipeline } from "./pipeline.js";
+import { fetchCommits, runPipeline } from "./pipeline.js";
 import { runSetupWizard } from "./setup.js";
 import { askMultiline, askSelect } from "./tui.js";
+import { StatusMessage, Spinner, CommitList, DryRunOutput, ConfigDisplay, ConfigUsage } from "./components.js";
+
+function renderOnce(node: React.ReactNode): void {
+  const output = renderToString(node);
+  process.stdout.write(output.endsWith("\n") ? output : `${output}\n`);
+}
 
 const program = new Command();
 
@@ -30,7 +36,9 @@ async function runCommand(options: {
   let config = await loadConfig();
 
   if (!hasConfig) {
-    console.log(chalk.yellow("No configuration found. Starting setup wizard...\n"));
+    renderOnce(
+      <StatusMessage type="warning">No configuration found. Starting setup wizard...</StatusMessage>,
+    );
     config = await runSetupWizard();
   }
 
@@ -44,6 +52,15 @@ async function runCommand(options: {
     config = { ...config, llm: { ...config.llm, provider: options.provider as Provider } };
   }
 
+  // Fetch and display commits
+  const { commits, since } = await fetchCommits({
+    repos: config.repos,
+    author: config.author,
+    since: options.since,
+  });
+
+  renderOnce(<CommitList commits={commits} />);
+
   // Collect today's plan
   let todayPlan: string;
   if (options.today) {
@@ -56,28 +73,50 @@ async function runCommand(options: {
 
   const llm = createProvider(config);
 
-  const spinner = options.dryRun ? null : ora("Generating standup report...").start();
-  try {
+  if (options.dryRun) {
     const result = await runPipeline({
-      repos: config.repos,
+      commits,
+      since,
       llm,
       outputDir: config.outputDir,
       templatePath: config.templatePath,
       systemPromptPath: config.systemPromptPath,
       todayPlan,
-      author: config.author,
       ticketBaseUrl: config.ticketBaseUrl,
-      dryRun: options.dryRun,
-      since: options.since,
+      dryRun: true,
     });
 
-    spinner?.stop();
+    if (result.systemPrompt && result.userPrompt) {
+      renderOnce(<DryRunOutput systemPrompt={result.systemPrompt} userPrompt={result.userPrompt} />);
+    }
+    return;
+  }
 
-    if (!options.dryRun && result.outputPath) {
-      console.log(chalk.green(`\n✓ Standup saved to: ${result.outputPath}\n`));
+  // Show spinner, run pipeline
+  const spinnerInstance = render(<Spinner label="Generating standup report..." />);
+  try {
+    const result = await runPipeline({
+      commits,
+      since,
+      llm,
+      outputDir: config.outputDir,
+      templatePath: config.templatePath,
+      systemPromptPath: config.systemPromptPath,
+      todayPlan,
+      ticketBaseUrl: config.ticketBaseUrl,
+    });
+
+    spinnerInstance.unmount();
+
+    if (result.outputPath) {
+      renderOnce(
+        <Box marginY={1}>
+          <StatusMessage type="success">Standup saved to: {result.outputPath}</StatusMessage>
+        </Box>,
+      );
     }
   } catch (err) {
-    spinner?.stop();
+    spinnerInstance.unmount();
     throw err;
   }
 }
@@ -110,7 +149,7 @@ function applyConfigSet(config: Config, key: string, value: string): void {
   const setter = validKeys[key];
   if (!setter) {
     throw new Error(
-      `Unknown config key: "${key}"\nValid keys: ${Object.keys(validKeys).join(", ")}`
+      `Unknown config key: "${key}"\nValid keys: ${Object.keys(validKeys).join(", ")}`,
     );
   }
   setter(value);
@@ -134,31 +173,41 @@ program
   }) => {
     if (options.show) {
       const config = await loadConfig();
-      console.log(chalk.cyan("\nCurrent configuration:\n"));
-      console.log(JSON.stringify(config, null, 2));
-      console.log("");
+      renderOnce(<ConfigDisplay config={config} />);
     } else if (options.edit) {
       await runSetupWizard();
     } else if (options.set) {
       const eqIdx = options.set.indexOf("=");
       if (eqIdx === -1) {
-        throw new Error(`--set requires key=value format (e.g. --set llm.model=llama3.2)`);
+        throw new Error("--set requires key=value format (e.g. --set llm.model=llama3.2)");
       }
       const key = options.set.slice(0, eqIdx).trim();
       const value = options.set.slice(eqIdx + 1).trim();
       const config = await loadConfig();
       applyConfigSet(config, key, value);
       await saveConfig(config);
-      console.log(chalk.green(`\n✓ Set ${key} = ${value}\n`));
+      renderOnce(
+        <Box marginY={1}>
+          <StatusMessage type="success">Set {key} = {value}</StatusMessage>
+        </Box>,
+      );
     } else if (options.addRepo) {
       const config = await loadConfig();
       const expanded = options.addRepo.replace(/^~/, process.env.HOME ?? "~");
       if (config.repos.includes(expanded)) {
-        console.log(chalk.yellow(`\nRepo already in list: ${expanded}\n`));
+        renderOnce(
+          <Box marginY={1}>
+            <StatusMessage type="warning">Repo already in list: {expanded}</StatusMessage>
+          </Box>,
+        );
       } else {
         config.repos.push(expanded);
         await saveConfig(config);
-        console.log(chalk.green(`\n✓ Added repo: ${expanded}\n`));
+        renderOnce(
+          <Box marginY={1}>
+            <StatusMessage type="success">Added repo: {expanded}</StatusMessage>
+          </Box>,
+        );
       }
     } else if (options.removeRepo) {
       const config = await loadConfig();
@@ -169,28 +218,13 @@ program
       }
       config.repos.splice(idx, 1);
       await saveConfig(config);
-      console.log(chalk.green(`\n✓ Removed repo: ${expanded}\n`));
+      renderOnce(
+        <Box marginY={1}>
+          <StatusMessage type="success">Removed repo: {expanded}</StatusMessage>
+        </Box>,
+      );
     } else {
-      console.log([
-        "",
-        chalk.cyan("Usage:"),
-        "  dawnlog config --show                          Print current config",
-        "  dawnlog config --edit                          Re-run setup wizard",
-        "  dawnlog config --set <key>=<value>             Set a config value",
-        "  dawnlog config --add-repo <path>               Add a repo",
-        "  dawnlog config --remove-repo <path>            Remove a repo",
-        "",
-        chalk.cyan("Settable keys:"),
-        "  llm.provider       anthropic | openai | ollama",
-        "  llm.model          e.g. claude-haiku-4-5, gpt-4o, llama3.2",
-        "  llm.apiKey         API key (or set via env var)",
-        "  llm.baseUrl        Base URL (Ollama default: http://localhost:11434)",
-        "  outputDir          Directory where .md files are saved",
-        "  templatePath       Path to the standup template",
-        "  author             Git author filter (name or email)",
-        "  ticketBaseUrl      Ticket URL prefix for linkifying IDs",
-        "",
-      ].join("\n"));
+      renderOnce(<ConfigUsage />);
     }
   });
 
@@ -212,10 +246,18 @@ program
 
     const updated = { ...config, llm: { ...config.llm, provider } };
     await saveConfig(updated);
-    console.log(chalk.green(`\n✓ Default provider set to: ${provider}\n`));
+    renderOnce(
+      <Box marginY={1}>
+        <StatusMessage type="success">Default provider set to: {provider}</StatusMessage>
+      </Box>,
+    );
   });
 
 program.parseAsync(process.argv).catch((err: Error) => {
-  console.error(chalk.red(`\nError: ${err.message}\n`));
+  renderOnce(
+    <Box marginY={1}>
+      <Text color="red">Error: {err.message}</Text>
+    </Box>,
+  );
   process.exit(1);
 });

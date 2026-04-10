@@ -252,9 +252,9 @@ program
     const provider = await askSelect<"anthropic" | "openai" | "ollama">(
       "Select LLM provider:",
       [
+        { label: "Ollama (local)", value: "ollama" },
         { label: "Anthropic (Claude)", value: "anthropic" },
         { label: "OpenAI (GPT-4o)", value: "openai" },
-        { label: "Ollama (local)", value: "ollama" },
       ],
     );
 

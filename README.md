@@ -28,8 +28,8 @@ dawnlog
 
 On first run, the setup wizard will guide you through:
 1. Adding your git repo paths
-2. Choosing an LLM provider (Anthropic, OpenAI, or Ollama)
-3. Setting your API key
+2. Choosing an LLM provider (Ollama, Anthropic, or OpenAI)
+3. Setting your API key (if using a cloud provider)
 4. Configuring output location
 
 Then every morning:
@@ -67,9 +67,8 @@ Config is stored at `~/.dawnlog/config.json`. You can edit it directly or use `d
 {
   "repos": ["/absolute/path/to/repo1", "/absolute/path/to/repo2"],
   "llm": {
-    "provider": "anthropic",
-    "model": "claude-haiku-4-5",
-    "apiKey": "sk-ant-..."
+    "provider": "ollama",
+    "model": "gemma4"
   },
   "outputDir": "~/dawnlogs",
   "templatePath": "/path/to/templates/standup.md",
@@ -81,7 +80,7 @@ Config is stored at `~/.dawnlog/config.json`. You can edit it directly or use `d
 | Field | Description | Default |
 |-------|-------------|---------|
 | `repos` | Absolute paths to git repositories to scan | `[]` |
-| `llm.provider` | `anthropic`, `openai`, or `ollama` | `anthropic` |
+| `llm.provider` | `ollama`, `anthropic`, or `openai` | `ollama` |
 | `llm.model` | Model to use (provider-specific) | Provider default |
 | `llm.apiKey` | API key (falls back to env var) | — |
 | `llm.baseUrl` | Custom base URL (Ollama or OpenAI-compatible) | — |
@@ -96,7 +95,7 @@ Config is stored at `~/.dawnlog/config.json`. You can edit it directly or use `d
 ```bash
 # Switch provider and model
 dawnlog config --set llm.provider=ollama
-dawnlog config --set llm.model=llama3.2
+dawnlog config --set llm.model=gemma4
 
 # Update API key
 dawnlog config --set llm.apiKey=sk-ant-...
@@ -125,7 +124,19 @@ API keys can be set via environment variables instead of storing them in the con
 
 ## LLM Providers
 
-### Anthropic (default)
+### Ollama (default)
+Runs models locally — no API key or internet connection needed.
+
+**Setup:**
+```bash
+# Install Ollama from https://ollama.com, then:
+ollama serve
+ollama pull gemma4   # default — or mistral, llama3.1:8b, qwen2.5:7b, etc.
+```
+
+Default model: `gemma4`. Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
+
+### Anthropic
 Uses Claude models. Set `ANTHROPIC_API_KEY` or add it via the setup wizard.
 Default model: `claude-haiku-4-5`.
 
@@ -142,21 +153,6 @@ Supports a custom `baseUrl` for OpenAI-compatible APIs (Groq, Together, etc.).
 dawnlog config --set llm.provider=openai
 dawnlog config --set llm.model=gpt-4o
 ```
-
-### Ollama (local)
-Runs models locally — no API key or internet connection needed.
-
-**Setup:**
-```bash
-# Install Ollama from https://ollama.com, then:
-ollama serve
-ollama pull gemma4   # default — or mistral, llama3.1:8b, qwen2.5:7b, etc.
-
-dawnlog config --set llm.provider=ollama
-dawnlog config --set llm.model=gemma4
-```
-
-Default model: `gemma4`. Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
 
 ### Adding a Custom Provider
 1. Create `src/llm/myprovider.ts` implementing the `LLMProvider` interface

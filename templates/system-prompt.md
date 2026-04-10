@@ -31,6 +31,13 @@ Workload: Full
 Key qualities of the example above:
 - Each ticket has one summary line ("TICKET — what was achieved overall"), not a list of raw commit messages
 - Bullet points describe the implementation detail and reasoning, not just what changed
-- Area labels (Backend:, Frontend:, Ops:) group related work clearly
+- Area labels group related work clearly
 - Blockers are specific and actionable
 - Workload is inferred from context
+
+Area label guide — use the most specific label that fits:
+- Backend: — server-side code, APIs, services, database changes
+- Frontend: — UI components, client-side logic, styling
+- Ops: — infrastructure, CI/CD, deployments, monitoring, DevOps tooling
+- General: — meetings, planning sessions, architecture discussions, code reviews, non-code activities
+Only include area labels that have content. Do not force items into the wrong category.

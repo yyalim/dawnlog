@@ -23,10 +23,12 @@ program
   .option("--today <plan>", "Skip interactive prompt and use this as today's plan")
   .option("--provider <name>", "Override the LLM provider for this run")
   .option("--dry-run", "Print prompts without calling the LLM or saving a file")
-  .option("--since <date>", "Query commits from a specific date (YYYY-MM-DD) instead of last working day");
+  .option("--since <date>", "Query commits from a specific date (YYYY-MM-DD) instead of last working day")
+  .option("--yesterday <notes>", "Skip interactive prompt and use this as additional yesterday notes");
 
 async function runCommand(options: {
   today?: string;
+  yesterday?: string;
   provider?: string;
   dryRun?: boolean;
   since?: string;
@@ -61,6 +63,16 @@ async function runCommand(options: {
 
   renderOnce(<CommitList commits={commits} />);
 
+  // Collect additional yesterday notes (meetings, planning, etc.)
+  let yesterdayNotes: string | undefined;
+  const hasYesterdayOption = options.yesterday !== undefined;
+  if (!options.dryRun && !hasYesterdayOption) {
+    yesterdayNotes = await askMultiline("Anything else from yesterday not in the commits? (e.g. meetings, reviews, discussions)");
+    if (!yesterdayNotes) yesterdayNotes = undefined;
+  } else if (hasYesterdayOption) {
+    yesterdayNotes = options.yesterday || undefined;
+  }
+
   // Collect today's plan
   let todayPlan: string;
   if (options.today) {
@@ -83,6 +95,7 @@ async function runCommand(options: {
       systemPromptPath: config.systemPromptPath,
       todayPlan,
       ticketBaseUrl: config.ticketBaseUrl,
+      yesterdayNotes,
       dryRun: true,
     });
 
@@ -104,6 +117,7 @@ async function runCommand(options: {
       systemPromptPath: config.systemPromptPath,
       todayPlan,
       ticketBaseUrl: config.ticketBaseUrl,
+      yesterdayNotes,
     });
 
     spinnerInstance.unmount();
@@ -122,7 +136,7 @@ async function runCommand(options: {
 }
 
 // Default action (dawnlog with no subcommand)
-program.action(async (options: { today?: string; provider?: string; dryRun?: boolean; since?: string }) => {
+program.action(async (options: { today?: string; yesterday?: string; provider?: string; dryRun?: boolean; since?: string }) => {
   await runCommand(options);
 });
 
@@ -238,9 +252,9 @@ program
     const provider = await askSelect<"anthropic" | "openai" | "ollama">(
       "Select LLM provider:",
       [
+        { label: "Ollama (local)", value: "ollama" },
         { label: "Anthropic (Claude)", value: "anthropic" },
         { label: "OpenAI (GPT-4o)", value: "openai" },
-        { label: "Ollama (local)", value: "ollama" },
       ],
     );
 

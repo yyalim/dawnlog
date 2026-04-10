@@ -29,7 +29,7 @@ export interface Config {
 const DEFAULTS: Config = {
   repos: [],
   llm: {
-    provider: "anthropic",
+    provider: "ollama",
   },
   outputDir: DEFAULT_OUTPUT_DIR,
   templatePath: DEFAULT_TEMPLATE_PATH,

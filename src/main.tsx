@@ -65,11 +65,12 @@ async function runCommand(options: {
 
   // Collect additional yesterday notes (meetings, planning, etc.)
   let yesterdayNotes: string | undefined;
-  if (!options.dryRun && !options.yesterday) {
+  const hasYesterdayOption = options.yesterday !== undefined;
+  if (!options.dryRun && !hasYesterdayOption) {
     yesterdayNotes = await askMultiline("Anything else from yesterday not in the commits? (e.g. meetings, reviews, discussions)");
     if (!yesterdayNotes) yesterdayNotes = undefined;
-  } else if (options.yesterday) {
-    yesterdayNotes = options.yesterday;
+  } else if (hasYesterdayOption) {
+    yesterdayNotes = options.yesterday || undefined;
   }
 
   // Collect today's plan

@@ -68,7 +68,6 @@ interface Config {
     baseUrl?: string;       // for Ollama
   };
   outputDir: string;        // where .md files are saved (~/dawnlogs by default)
-  templatePath: string;     // path to the markdown template
   author?: string;          // git author filter (email or name)
 }
 ```

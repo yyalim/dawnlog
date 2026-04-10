@@ -1,7 +1,7 @@
 import type { LLMProvider, LLMRequest } from "./types.js";
 
 const DEFAULT_BASE_URL = "http://localhost:11434";
-const DEFAULT_MODEL = "gemma3:12b";
+const DEFAULT_MODEL = "gemma4";
 
 interface OllamaResponse {
   message: {

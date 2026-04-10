@@ -150,13 +150,13 @@ Runs models locally — no API key or internet connection needed.
 ```bash
 # Install Ollama from https://ollama.com, then:
 ollama serve
-ollama pull gemma3:12b   # default — or mistral, llama3.1:8b, qwen2.5:7b, etc.
+ollama pull gemma4   # default — or mistral, llama3.1:8b, qwen2.5:7b, etc.
 
 dawnlog config --set llm.provider=ollama
-dawnlog config --set llm.model=gemma3:12b
+dawnlog config --set llm.model=gemma4
 ```
 
-Default model: `gemma3:12b`. Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
+Default model: `gemma4`. Default base URL: `http://localhost:11434`. Override with `--set llm.baseUrl=...` if needed.
 
 ### Adding a Custom Provider
 1. Create `src/llm/myprovider.ts` implementing the `LLMProvider` interface

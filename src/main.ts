@@ -4,7 +4,7 @@ import chalk from "chalk";
 import ora from "ora";
 import { loadConfig, saveConfig, configExists, type Config } from "./config.js";
 import { createProvider } from "./llm/index.js";
-import { runPipeline } from "./pipeline.js";
+import { fetchAndDisplayCommits, runPipeline } from "./pipeline.js";
 import { runSetupWizard } from "./setup.js";
 import { askMultiline, askSelect } from "./tui.js";
 
@@ -44,6 +44,13 @@ async function runCommand(options: {
     config = { ...config, llm: { ...config.llm, provider: options.provider as Provider } };
   }
 
+  // Fetch and display commits before asking for today's plan
+  const { commits, since } = await fetchAndDisplayCommits({
+    repos: config.repos,
+    author: config.author,
+    since: options.since,
+  });
+
   // Collect today's plan
   let todayPlan: string;
   if (options.today) {
@@ -59,16 +66,15 @@ async function runCommand(options: {
   const spinner = options.dryRun ? null : ora("Generating standup report...").start();
   try {
     const result = await runPipeline({
-      repos: config.repos,
+      commits,
+      since,
       llm,
       outputDir: config.outputDir,
       templatePath: config.templatePath,
       systemPromptPath: config.systemPromptPath,
       todayPlan,
-      author: config.author,
       ticketBaseUrl: config.ticketBaseUrl,
       dryRun: options.dryRun,
-      since: options.since,
     });
 
     spinner?.stop();

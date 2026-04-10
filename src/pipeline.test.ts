@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { runPipeline } from "./pipeline.js";
+import { fetchAndDisplayCommits, runPipeline } from "./pipeline.js";
 import { MockLLMProvider } from "../tests/helpers/mockProvider.js";
 import { createFakeRepo, destroyFakeRepo } from "../tests/helpers/fakeRepo.js";
 import { DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "./config.js";
@@ -30,8 +30,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchAndDisplayCommits({ repos: [repo] });
       await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -53,8 +55,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchAndDisplayCommits({ repos: [repo] });
       await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -77,8 +81,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchAndDisplayCommits({ repos: [repo] });
       const result = await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -101,8 +107,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchAndDisplayCommits({ repos: [repo] });
       const result = await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,
@@ -129,8 +137,10 @@ describe("runPipeline — dry-run", () => {
 
     try {
       const llm = new MockLLMProvider();
+      const { commits, since } = await fetchAndDisplayCommits({ repos: [repo] });
       await runPipeline({
-        repos: [repo],
+        commits,
+        since,
         llm,
         outputDir,
         templatePath: DEFAULT_TEMPLATE_PATH,

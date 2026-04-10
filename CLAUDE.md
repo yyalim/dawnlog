@@ -91,11 +91,8 @@ dawnlog provider               # switch default LLM interactively
 
 ## Planned features / good first tasks
 
-- [ ] Parse Jira/Linear ticket IDs from commit messages and linkify them in output
-- [ ] `--dry-run` flag: print prompt without calling LLM
 - [ ] `dawnlog post` command: post output to Slack via webhook
 - [ ] `dawnlog week` command: weekly summary across all logs in outputDir
-- [ ] `npx dawnlog` support (publish to npm)
 - [ ] Config: `excludePatterns` to filter out noise commits (e.g. "chore: bump version")
 - [ ] Config: named repo aliases (display "api-service" instead of full path)
 - [ ] Shell completion (bash/zsh) via commander

@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { fetchAndDisplayCommits, runPipeline } from "../../src/pipeline.js";
+import { fetchCommits, runPipeline } from "../../src/pipeline.js";
 import { getLastWorkingDay } from "../../src/git.js";
 import { MockLLMProvider } from "../helpers/mockProvider.js";
 import { createFakeRepo, destroyFakeRepo } from "../helpers/fakeRepo.js";
@@ -77,7 +77,7 @@ describe("E2E — full month simulation (January 2025)", () => {
 
       try {
         const llm = new MockLLMProvider();
-        const { commits, since: fetchedSince } = await fetchAndDisplayCommits({ repos: [repo] });
+        const { commits, since: fetchedSince } = await fetchCommits({ repos: [repo] });
         const result = await runPipeline({
           commits,
           since: fetchedSince,

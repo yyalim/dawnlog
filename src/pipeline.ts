@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import chalk from "chalk";
 import { getLastWorkingDay, parseDateRange, getCommitsForAllRepos, type Commit } from "./git.js";
 import { buildSystemPrompt, buildUserPrompt } from "./prompt.js";
 import { saveOutput } from "./output.js";
@@ -11,30 +10,9 @@ export interface FetchCommitsOptions {
   since?: string;
 }
 
-export async function fetchAndDisplayCommits(opts: FetchCommitsOptions): Promise<{ commits: Commit[]; since: Date; until: Date }> {
+export async function fetchCommits(opts: FetchCommitsOptions): Promise<{ commits: Commit[]; since: Date; until: Date }> {
   const { since, until } = opts.since ? parseDateRange(opts.since) : getLastWorkingDay();
   const commits = await getCommitsForAllRepos(opts.repos, since, until, opts.author);
-
-  if (commits.length > 0) {
-    const grouped = new Map<string, Commit[]>();
-    for (const commit of commits) {
-      const list = grouped.get(commit.repo) ?? [];
-      list.push(commit);
-      grouped.set(commit.repo, list);
-    }
-
-    console.log("");
-    for (const [repo, repoCommits] of grouped) {
-      console.log(chalk.cyan(`  ${repo}`) + chalk.dim(` (${repoCommits.length} commit${repoCommits.length === 1 ? "" : "s"})`));
-      for (const c of repoCommits) {
-        console.log(chalk.dim(`    ${c.shortHash}`) + ` ${c.subject}`);
-      }
-    }
-    console.log("");
-  } else {
-    console.log(chalk.dim("\n  No commits found for the last working day.\n"));
-  }
-
   return { commits, since, until };
 }
 
@@ -53,6 +31,8 @@ export interface PipelineOptions {
 export interface PipelineResult {
   outputPath: string;
   content: string;
+  systemPrompt?: string;
+  userPrompt?: string;
 }
 
 export async function runPipeline(opts: PipelineOptions): Promise<PipelineResult> {
@@ -66,16 +46,10 @@ export async function runPipeline(opts: PipelineOptions): Promise<PipelineResult
   const userPrompt = buildUserPrompt(opts.commits, opts.todayPlan, opts.since, now, templateContent, opts.ticketBaseUrl);
 
   if (opts.dryRun) {
-    console.log(chalk.bold("\n─── SYSTEM PROMPT ───\n"));
-    console.log(systemPrompt);
-    console.log(chalk.bold("\n─── USER PROMPT ───\n"));
-    console.log(userPrompt);
-    console.log(chalk.bold("\n─── (dry run — LLM not called, no file written) ───\n"));
-    return { outputPath: "", content: "" };
+    return { outputPath: "", content: "", systemPrompt, userPrompt };
   }
 
   const content = await opts.llm.complete({ systemPrompt, userPrompt });
-
   const outputPath = await saveOutput(content, opts.outputDir, now);
 
   return { outputPath, content };

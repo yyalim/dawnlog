@@ -2,7 +2,7 @@ import { describe, test, expect, beforeEach, afterEach, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { fetchAndDisplayCommits, runPipeline } from "../../src/pipeline.js";
+import { fetchCommits, runPipeline } from "../../src/pipeline.js";
 import { MockLLMProvider } from "../helpers/mockProvider.js";
 import { createFakeRepo, destroyFakeRepo } from "../helpers/fakeRepo.js";
 import { DEFAULT_TEMPLATE_PATH, DEFAULT_SYSTEM_PROMPT_PATH } from "../../src/config.js";
@@ -18,7 +18,7 @@ async function makePipelineOpts(
   overrides: Partial<Parameters<typeof runPipeline>[0] & { author?: string; sinceDate?: string }> = {},
 ) {
   const { author, sinceDate, ...rest } = overrides;
-  const { commits, since } = await fetchAndDisplayCommits({ repos, author, since: sinceDate });
+  const { commits, since } = await fetchCommits({ repos, author, since: sinceDate });
   return {
     commits,
     since,

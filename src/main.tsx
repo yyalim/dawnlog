@@ -24,13 +24,15 @@ program
   .option("--provider <name>", "Override the LLM provider for this run")
   .option("--dry-run", "Print prompts without calling the LLM or saving a file")
   .option("--since <date>", "Query commits from a specific date (YYYY-MM-DD) instead of last working day")
-  .option("--yesterday <notes>", "Skip interactive prompt and use this as additional yesterday notes");
+  .option("--yesterday <notes>", "Skip interactive prompt and use this as additional yesterday notes")
+  .option("--stdout", "Print the generated report to the terminal");
 
 async function runCommand(options: {
   today?: string;
   yesterday?: string;
   provider?: string;
   dryRun?: boolean;
+  stdout?: boolean;
   since?: string;
 }): Promise<void> {
   // First-run detection
@@ -122,6 +124,10 @@ async function runCommand(options: {
 
     spinnerInstance.unmount();
 
+    if (options.stdout) {
+      process.stdout.write(`${result.content}\n`);
+    }
+
     if (result.outputPath) {
       renderOnce(
         <Box marginY={1}>
@@ -136,7 +142,7 @@ async function runCommand(options: {
 }
 
 // Default action (dawnlog with no subcommand)
-program.action(async (options: { today?: string; yesterday?: string; provider?: string; dryRun?: boolean; since?: string }) => {
+program.action(async (options: { today?: string; yesterday?: string; provider?: string; dryRun?: boolean; stdout?: boolean; since?: string }) => {
   await runCommand(options);
 });
 
